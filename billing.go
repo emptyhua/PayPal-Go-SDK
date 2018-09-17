@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -22,11 +23,13 @@ type (
 
 	// CreateAgreementResp struct
 	CreateAgreementResp struct {
+		ID          string      `json:"id,omitempty"`
+		State       string      `json:"state,omitempty"`
 		Name        string      `json:"name,omitempty"`
 		Description string      `json:"description,omitempty"`
 		Plan        BillingPlan `json:"plan,omitempty"`
 		Links       []Link      `json:"links,omitempty"`
-		StartTime   time.Time   `json:"start_time,omitempty"`
+		StartDate   string      `json:"start_date,omitempty"`
 	}
 )
 
@@ -65,6 +68,34 @@ func (c *Client) CreateBillingAgreement(a BillingAgreement) (*CreateAgreementRes
 	}
 
 	req, err := c.NewRequest("POST", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-agreements"), a)
+	response := &CreateAgreementResp{}
+	if err != nil {
+		return response, err
+	}
+	err = c.SendWithAuth(req, response)
+
+	// Orz
+	// https://github.com/paypal/PayPal-REST-API-issues/issues/19
+	if err == nil && response.ID == "" {
+		for _, link := range response.Links {
+			if link.Rel == "approval_url" {
+				u, err := url.Parse(link.Href)
+				if err != nil {
+					return response, err
+				}
+				q := u.Query()
+				response.ID = q.Get("token")
+			}
+		}
+	}
+
+	return response, err
+}
+
+// GetBillingAgreement show agreement details
+// Endpoint: GET /v1/payments/billing-agreements/{agreement_id}
+func (c *Client) GetBillingAgreement(aid string) (*CreateAgreementResp, error) {
+	req, err := c.NewRequest("GET", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-agreements/"+aid), nil)
 	response := &CreateAgreementResp{}
 	if err != nil {
 		return response, err
