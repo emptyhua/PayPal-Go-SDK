@@ -10,8 +10,8 @@ import (
 )
 
 type (
-	// CreateBillingResp struct
-	CreateBillingResp struct {
+	// CreateBillingPlanResp struct
+	CreateBillingPlanResp struct {
 		ID                  string              `json:"id,omitempty"`
 		State               string              `json:"state,omitempty"`
 		PaymentDefinitions  []PaymentDefinition `json:"payment_definitions,omitempty"`
@@ -23,7 +23,6 @@ type (
 
 	// CreateAgreementResp struct
 	CreateAgreementResp struct {
-		ID          string      `json:"id,omitempty"`
 		State       string      `json:"state,omitempty"`
 		Name        string      `json:"name,omitempty"`
 		Description string      `json:"description,omitempty"`
@@ -33,11 +32,25 @@ type (
 	}
 )
 
+func (r CreateAgreementResp) GetExecuteToken() (string, error) {
+	for _, link := range r.Links {
+		if link.Rel == "approval_url" {
+			u, err := url.Parse(link.Href)
+			if err != nil {
+				return "", err
+			}
+			q := u.Query()
+			return q.Get("token"), nil
+		}
+	}
+	return "", fmt.Errorf("can't find execute token")
+}
+
 // CreateBillingPlan creates a billing plan in Paypal
 // Endpoint: POST /v1/payments/billing-plans
-func (c *Client) CreateBillingPlan(plan BillingPlan) (*CreateBillingResp, error) {
+func (c *Client) CreateBillingPlan(plan BillingPlan) (*CreateBillingPlanResp, error) {
 	req, err := c.NewRequest("POST", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-plans"), plan)
-	response := &CreateBillingResp{}
+	response := &CreateBillingPlanResp{}
 	if err != nil {
 		return response, err
 	}
@@ -73,21 +86,6 @@ func (c *Client) CreateBillingAgreement(a BillingAgreement) (*CreateAgreementRes
 		return response, err
 	}
 	err = c.SendWithAuth(req, response)
-
-	// Orz
-	// https://github.com/paypal/PayPal-REST-API-issues/issues/19
-	if err == nil && response.ID == "" {
-		for _, link := range response.Links {
-			if link.Rel == "approval_url" {
-				u, err := url.Parse(link.Href)
-				if err != nil {
-					return response, err
-				}
-				q := u.Query()
-				response.ID = q.Get("token")
-			}
-		}
-	}
 
 	return response, err
 }

@@ -20,13 +20,13 @@ type (
 	}
 
 	WebhookVerifySignatureReq struct {
-		AuthAlgo         string       `json:"auth_algo"`
-		CertUrl          string       `json:"cert_url"`
-		TransmissionId   string       `json:"transmission_id"`
-		TransmissionSig  string       `json:"transmission_sig"`
-		TransmissionTime string       `json:"transmission_time"`
-		WebhookId        string       `json:"webhook_id"`
-		WebhookEvent     WebhookEvent `json:"webhook_event"`
+		AuthAlgo         string          `json:"auth_algo"`
+		CertUrl          string          `json:"cert_url"`
+		TransmissionId   string          `json:"transmission_id"`
+		TransmissionSig  string          `json:"transmission_sig"`
+		TransmissionTime string          `json:"transmission_time"`
+		WebhookId        string          `json:"webhook_id"`
+		WebhookEvent     json.RawMessage `json:"webhook_event"`
 	}
 
 	WebhookVerifySignatureResp struct {

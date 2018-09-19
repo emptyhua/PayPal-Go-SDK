@@ -130,11 +130,13 @@ type (
 
 	// BillingAgreement struct
 	BillingAgreement struct {
+		ID              string           `json:"id,omitempty"`
+		State           string           `json:"state,omitempty"`
 		Name            string           `json:"name,omitempty"`
 		Description     string           `json:"description,omitempty"`
 		StartDate       JSONTime         `json:"start_date,omitempty"`
-		Plan            BillingPlan      `json:"plan,omitempty"`
 		Payer           Payer            `json:"payer,omitempty"`
+		Plan            BillingPlan      `json:"plan,omitempty"`
 		ShippingAddress *ShippingAddress `json:"shipping_address,omitempty"`
 	}
 
@@ -482,6 +484,7 @@ type (
 		ClearingTime              string     `json:"clearing_time,omitempty"`
 		ProtectionEligibility     string     `json:"protection_eligibility,omitempty"`
 		ProtectionEligibilityType string     `json:"protection_eligibility_type,omitempty"`
+		BillingAgreementID        string     `json:"billing_agreement_id,omitempty"`
 		Links                     []Link     `json:"links,omitempty"`
 	}
 
@@ -604,6 +607,15 @@ func (r *ErrorResponse) Error() string {
 func (t JSONTime) MarshalJSON() ([]byte, error) {
 	stamp := fmt.Sprintf(`"%s"`, time.Time(t).UTC().Format(time.RFC3339))
 	return []byte(stamp), nil
+}
+
+func (t *JSONTime) UnmarshalJSON(b []byte) error {
+	var tt time.Time
+	if err := json.Unmarshal(b, &tt); err != nil {
+		return err
+	}
+	*t = JSONTime(tt)
+	return nil
 }
 
 func (e *expirationTime) UnmarshalJSON(b []byte) error {
