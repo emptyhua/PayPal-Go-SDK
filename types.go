@@ -130,14 +130,15 @@ type (
 
 	// BillingAgreement struct
 	BillingAgreement struct {
-		ID              string           `json:"id,omitempty"`
-		State           string           `json:"state,omitempty"`
-		Name            string           `json:"name,omitempty"`
-		Description     string           `json:"description,omitempty"`
-		StartDate       JSONTime         `json:"start_date,omitempty"`
-		Payer           Payer            `json:"payer,omitempty"`
-		Plan            BillingPlan      `json:"plan,omitempty"`
-		ShippingAddress *ShippingAddress `json:"shipping_address,omitempty"`
+		ID               string            `json:"id,omitempty"`
+		State            string            `json:"state,omitempty"`
+		Name             string            `json:"name,omitempty"`
+		Description      string            `json:"description,omitempty"`
+		StartDate        JSONTime          `json:"start_date,omitempty"`
+		AgreementDetails *AgreementDetails `json:"agreement_details,omitempty"`
+		Payer            *Payer            `json:"payer,omitempty"`
+		Plan             *BillingPlan      `json:"plan,omitempty"`
+		ShippingAddress  *ShippingAddress  `json:"shipping_address,omitempty"`
 	}
 
 	// BillingPlan struct
@@ -258,19 +259,6 @@ type (
 		Message         string                `json:"message"`
 		InformationLink string                `json:"information_link"`
 		Details         []ErrorResponseDetail `json:"details"`
-	}
-
-	// ExecuteAgreementResponse struct
-	ExecuteAgreementResponse struct {
-		ID               string           `json:"id"`
-		State            string           `json:"state"`
-		Description      string           `json:"description,omitempty"`
-		Payer            Payer            `json:"payer"`
-		Plan             BillingPlan      `json:"plan"`
-		StartDate        time.Time        `json:"start_date"`
-		ShippingAddress  ShippingAddress  `json:"shipping_address"`
-		AgreementDetails AgreementDetails `json:"agreement_details"`
-		Links            []Link           `json:"links"`
 	}
 
 	// ExecuteResponse struct

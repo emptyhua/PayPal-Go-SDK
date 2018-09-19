@@ -76,7 +76,7 @@ func (c *Client) ActivatePlan(planID string) error {
 // Endpoint: POST /v1/payments/billing-agreements
 func (c *Client) CreateBillingAgreement(a BillingAgreement) (*CreateAgreementResp, error) {
 	// PayPal needs only ID, so we will remove all fields except Plan ID
-	a.Plan = BillingPlan{
+	a.Plan = &BillingPlan{
 		ID: a.Plan.ID,
 	}
 
@@ -92,28 +92,28 @@ func (c *Client) CreateBillingAgreement(a BillingAgreement) (*CreateAgreementRes
 
 // GetBillingAgreement show agreement details
 // Endpoint: GET /v1/payments/billing-agreements/{agreement_id}
-func (c *Client) GetBillingAgreement(aid string) (*CreateAgreementResp, error) {
+func (c *Client) GetBillingAgreement(aid string) (*BillingAgreement, error) {
 	req, err := c.NewRequest("GET", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-agreements/"+aid), nil)
-	response := &CreateAgreementResp{}
 	if err != nil {
-		return response, err
+		return nil, err
 	}
+	response := &BillingAgreement{}
 	err = c.SendWithAuth(req, response)
 	return response, err
 }
 
 // ExecuteApprovedAgreement - Use this call to execute (complete) a PayPal agreement that has been approved by the payer.
 // Endpoint: POST /v1/payments/billing-agreements/token/agreement-execute
-func (c *Client) ExecuteApprovedAgreement(token string) (*ExecuteAgreementResponse, error) {
+func (c *Client) ExecuteApprovedAgreement(token string) (*BillingAgreement, error) {
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-agreements/"+token+"/agreement-execute"), nil)
 	if err != nil {
-		return &ExecuteAgreementResponse{}, err
+		return nil, err
 	}
 
 	req.SetBasicAuth(c.ClientID, c.Secret)
 	req.Header.Set("Authorization", "Bearer "+c.Token.Token)
 
-	e := ExecuteAgreementResponse{}
+	e := BillingAgreement{}
 
 	if err = c.SendWithAuth(req, &e); err != nil {
 		return &e, err
