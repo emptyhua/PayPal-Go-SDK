@@ -1,10 +1,8 @@
 package paypalsdk
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"time"
 )
@@ -62,13 +60,29 @@ func (c *Client) CreateBillingPlan(plan BillingPlan) (*CreateBillingPlanResp, er
 // By default, a new plan is not activated
 // Endpoint: PATCH /v1/payments/billing-plans/
 func (c *Client) ActivatePlan(planID string) error {
-	buf := bytes.NewBuffer([]byte("[{\"op\":\"replace\",\"path\":\"/\",\"value\":{\"state\":\"ACTIVE\"}}]"))
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-plans/"+planID), buf)
+	ops := []PatchField{
+		PatchField{
+			Operation: "replace",
+			Path:      "/",
+			Value: BillingPlan{
+				State: "ACTIVE",
+			},
+		},
+	}
+
+	return c.UpdatePlan(planID, ops)
+}
+
+// ActivatePlan activates a billing plan
+// By default, a new plan is not activated
+// Endpoint: PATCH /v1/payments/billing-plans/
+func (c *Client) UpdatePlan(planID string, ops []PatchField) error {
+	req, err := c.NewRequest("PATCH", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-plans/"+planID), ops)
 	if err != nil {
 		return err
 	}
-	req.SetBasicAuth(c.ClientID, c.Secret)
-	req.Header.Set("Authorization", "Bearer "+c.Token.Token)
+	// req.SetBasicAuth(c.ClientID, c.Secret)
+	// req.Header.Set("Authorization", "Bearer "+c.Token.Token)
 	return c.SendWithAuth(req, nil)
 }
 
@@ -98,20 +112,28 @@ func (c *Client) GetBillingAgreement(aid string) (*BillingAgreement, error) {
 		return nil, err
 	}
 	response := &BillingAgreement{}
-	err = c.SendWithAuth(req, response)
+	c.SendWithAuth(req, response)
 	return response, err
+}
+
+// UpdateBillingAgreement update agreement
+// Endpoint: PATCH /v1/payments/billing-agreements/{agreement_id}
+func (c *Client) UpdateBillingAgreement(aid string, ops []PatchField) error {
+	req, err := c.NewRequest("PATCH", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-agreements/"+aid), ops)
+	if err != nil {
+		return err
+	}
+
+	return c.SendWithAuth(req, nil)
 }
 
 // ExecuteApprovedAgreement - Use this call to execute (complete) a PayPal agreement that has been approved by the payer.
 // Endpoint: POST /v1/payments/billing-agreements/token/agreement-execute
 func (c *Client) ExecuteApprovedAgreement(token string) (*BillingAgreement, error) {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-agreements/"+token+"/agreement-execute"), nil)
+	req, err := c.NewRequest("POST", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-agreements/"+token+"/agreement-execute"), nil)
 	if err != nil {
 		return nil, err
 	}
-
-	req.SetBasicAuth(c.ClientID, c.Secret)
-	req.Header.Set("Authorization", "Bearer "+c.Token.Token)
 
 	e := BillingAgreement{}
 

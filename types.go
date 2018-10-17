@@ -134,7 +134,7 @@ type (
 		State            string            `json:"state,omitempty"`
 		Name             string            `json:"name,omitempty"`
 		Description      string            `json:"description,omitempty"`
-		StartDate        JSONTime          `json:"start_date,omitempty"`
+		StartDate        *JSONTime         `json:"start_date,omitempty"`
 		AgreementDetails *AgreementDetails `json:"agreement_details,omitempty"`
 		Payer            *Payer            `json:"payer,omitempty"`
 		Plan             *BillingPlan      `json:"plan,omitempty"`
@@ -147,8 +147,12 @@ type (
 		Name                string               `json:"name,omitempty"`
 		Description         string               `json:"description,omitempty"`
 		Type                string               `json:"type,omitempty"`
+		State               string               `json:"state,omitempty"`
+		CreateTime          *time.Time           `json:"create_time",omitempty"`
+		UpdateTime          *time.Time           `json:"update_time",omitempty"`
 		PaymentDefinitions  []PaymentDefinition  `json:"payment_definitions,omitempty"`
 		MerchantPreferences *MerchantPreferences `json:"merchant_preferences,omitempty"`
+		Links               []Link               `json:"links,omitempty"`
 	}
 
 	// Capture struct
@@ -321,6 +325,12 @@ type (
 		PendingReason string     `json:"pending_reason,omitempty"`
 		ParentPayment string     `json:"parent_payment,omitempty"`
 		Links         []Link     `json:"links,omitempty"`
+	}
+
+	PatchField struct {
+		Operation string      `json:"op"`
+		Path      string      `json:"path"`
+		Value     interface{} `json:"value"`
 	}
 
 	// Payer struct

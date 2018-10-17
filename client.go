@@ -162,20 +162,27 @@ func (c *Client) NewRequest(method, url string, payload interface{}) (*http.Requ
 }
 
 // log will dump request and response to the log file
-func (c *Client) log(r *http.Request, resp *http.Response) {
+func (c *Client) log(req *http.Request, resp *http.Response) {
 	if c.Log != nil {
 		var (
-			reqDump  string
+			reqDump  []byte
 			respDump []byte
 		)
 
-		if r != nil {
-			reqDump = fmt.Sprintf("%s %s. Data: %s", r.Method, r.URL.String(), r.Form.Encode())
+		if req != nil {
+			reqDump, _ = httputil.DumpRequestOut(req, false)
 		}
+
 		if resp != nil {
 			respDump, _ = httputil.DumpResponse(resp, true)
 		}
 
-		c.Log.Write([]byte(fmt.Sprintf("Request: %s\nResponse: %s\n", reqDump, string(respDump))))
+		c.Log.Write([]byte(fmt.Sprintf("%s:\nRequest: %s\nResponse: %s\n", req.URL, string(reqDump), string(respDump))))
+	}
+}
+
+func (c *Client) WriteLog(format string, a ...interface{}) {
+	if c.Log != nil {
+		c.Log.Write([]byte(fmt.Sprintf(format, a...) + "\n"))
 	}
 }
