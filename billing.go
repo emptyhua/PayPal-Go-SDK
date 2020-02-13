@@ -64,8 +64,8 @@ func (c *Client) ActivatePlan(planID string) error {
 		PatchField{
 			Operation: "replace",
 			Path:      "/",
-			Value: BillingPlan{
-				State: "ACTIVE",
+			Value: map[string]string{
+				"state": "ACTIVE",
 			},
 		},
 	}
