@@ -47,7 +47,7 @@ func (r CreateAgreementResp) GetExecuteToken() (string, error) {
 // CreateBillingPlan creates a billing plan in Paypal
 // Endpoint: POST /v1/payments/billing-plans
 func (c *Client) CreateBillingPlan(plan BillingPlan) (*CreateBillingPlanResp, error) {
-	req, err := c.NewRequest("POST", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-plans"), plan)
+	req, err := c.NewRequest("POST", fmt.Sprintf("%s%s", c.APIBase, "/v1/billing/plans"), plan)
 	response := &CreateBillingPlanResp{}
 	if err != nil {
 		return response, err
@@ -77,7 +77,7 @@ func (c *Client) ActivatePlan(planID string) error {
 // By default, a new plan is not activated
 // Endpoint: PATCH /v1/payments/billing-plans/
 func (c *Client) UpdatePlan(planID string, ops []PatchField) error {
-	req, err := c.NewRequest("PATCH", fmt.Sprintf("%s%s", c.APIBase, "/v1/payments/billing-plans/"+planID), ops)
+	req, err := c.NewRequest("PATCH", fmt.Sprintf("%s%s", c.APIBase, "/v1/billing/plans/"+planID), ops)
 	if err != nil {
 		return err
 	}
